@@ -42,6 +42,33 @@ func run(tree: SceneTree) -> Array[String]:
 	var state: Dictionary = game.call("snapshot")
 	if state.collected.size() < 5 or state.player.weapon != "thorn":
 		failures.append("Save snapshot must include rewards and active weapon")
+	var wheel := InputEventMouseButton.new()
+	wheel.pressed = true
+	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
+	game.call("_unhandled_input", wheel)
+	if player.attack_controller.get("weapon") != "club":
+		failures.append("Wheel up must wrap to first acquired weapon")
+	wheel.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	game.call("_unhandled_input", wheel)
+	if player.attack_controller.get("weapon") != "thorn":
+		failures.append("Wheel down must wrap to last acquired weapon")
+	game.call("set_paused", true)
+	game.call("_unhandled_input", wheel)
+	if player.attack_controller.get("weapon") != "thorn":
+		failures.append("Wheel must not change weapons while paused")
+	game.call("set_paused", false)
+	var key := InputEventKey.new()
+	key.pressed = true
+	key.physical_keycode = KEY_Q
+	game.call("_unhandled_input", key)
+	if player.attack_controller.get("weapon") != "thorn":
+		failures.append("Q must no longer switch weapons")
+	var button := InputEventJoypadButton.new()
+	button.pressed = true
+	button.button_index = JOY_BUTTON_Y
+	game.call("_unhandled_input", button)
+	if player.attack_controller.get("weapon") != "club":
+		failures.append("Y must still cycle acquired weapons")
 	var service: EESaveService = game.get("save_service") as EESaveService
 	if service.save_game(state) != OK:
 		failures.append("Integrated world snapshot must save: " + service.last_error)

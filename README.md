@@ -6,7 +6,11 @@ Stretch toward a ledge. Stick to a wall. Fold into a narrow passage, roll downhi
 
 ![Elastic Explorer running on Steam Deck](docs/images/steam-deck.png)
 
-**Godot 4.7.1 · Windows + Steam Deck · Single player**
+**Godot 4.7.1 · Web + Windows + Steam Deck · Single player**
+
+### [Play in your browser](https://halr9000.github.io/elastic-explorer/)
+
+Use a desktop browser with WebGL 2 support. Click the game to focus controls and enable audio.
 
 ## The experiment
 
@@ -36,7 +40,7 @@ Start with **Movement clearing** to practice jumping, rolling, swimming, squeezi
 | Roll | Hold Shift | Hold RB |
 | Squeeze | Hold Ctrl | Hold LB |
 | Interact / checkpoint | E | X |
-| Cycle acquired weapons | Q | Y |
+| Cycle acquired weapons | Mouse wheel up / down | Y |
 | Pause | Esc | Menu |
 | Menu navigation | Arrow keys / Enter / mouse | D-pad / A |
 
@@ -50,6 +54,9 @@ Find the heavy tip and thorn lash along the route. Wake the Canopy Bell, Drowned
 | --- | --- |
 | Windows | `%APPDATA%/ElasticExplorer/` |
 | Steam Deck | `~/.local/share/ElasticExplorer/` |
+| Web | Browser storage for this site (separate from desktop saves) |
+
+Keep site data enabled for browser saves. Clearing site data removes them; private browsing may not retain them between sessions.
 
 The primary file is `expedition.json`; `.bak` holds the previous valid state. Terrain geometry is recorded, so Continue does not regenerate a different world. Pickups, defeated enemies, discoveries, weapon state, checkpoint, and completion persist.
 
@@ -60,6 +67,7 @@ New World archives the previous expedition. Damaged originals are preserved when
 ```powershell
 ./tools/test.ps1
 ./tools/build.ps1
+./tools/build.ps1 -Target Web
 ```
 
 The Windows tooling requires PowerShell, Git, Python 3, and Godot 4.7.1 with matching export templates. The scripts locate the installed Godot console executable. Pass `-Godot 'C:/path/to/godot_console.exe'` to override.
@@ -67,6 +75,20 @@ The Windows tooling requires PowerShell, Git, Python 3, and Godot 4.7.1 with mat
 Tests run at real physics cadence; allow roughly 90 seconds. They check real player physics, 100 generated seeds, combat, persistence, and the expedition loop. Both exit codes and engine error output are checked. Building runs these tests by default.
 
 Build output includes a SHA-256 manifest. Matching Godot 4.7.1 export templates must be installed. `-SkipTests` on the build script is intended only after the same revision has passed verification.
+
+## Web publishing
+
+The [Pages workflow](.github/workflows/pages.yml) builds and tests the game with Godot
+4.7.1, then publishes it on every push to `implementation/elastic-explorer`.
+The Web preset uses a single thread, so GitHub Pages needs no custom isolation headers.
+To try a local export, serve `builds/web/` over HTTP rather than opening `index.html` directly:
+
+```powershell
+python -m http.server 8000 --directory builds/web
+```
+
+Open `http://localhost:8000`. Browser saves belong to that origin and do not transfer
+to the published site. Use Escape to pause and save back to the title before closing.
 
 ## Steam Deck
 

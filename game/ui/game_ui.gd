@@ -176,7 +176,8 @@ func show_title(available: bool) -> void:
 	var start: Button = _button("Begin a new world", _request_new)
 	_button("Movement clearing", func() -> void: playground_requested.emit())
 	_button("Settings & controls", func() -> void: show_settings("title"))
-	_button("Quit", func() -> void: quit_requested.emit())
+	if not OS.has_feature("web"):
+		_button("Quit", func() -> void: quit_requested.emit())
 	(first if available else start).grab_focus()
 
 func _request_new() -> void:
@@ -220,7 +221,7 @@ func show_settings(previous: String) -> void:
 	settings_return = previous
 	menu_state = "settings"
 	_clear()
-	_heading("MAKE YOURSELF AT HOME", "SETTINGS", "WASD / left stick: move · mouse / right stick: aim\nSpace / A: jump or swim burst\nRMB / LT: grip · LMB / RT: attack\nShift / RB: roll · Ctrl / LB: squeeze\nE / X: interact · Q / Y: change weapon")
+	_heading("MAKE YOURSELF AT HOME", "SETTINGS", "WASD / left stick: move · mouse / right stick: aim\nSpace / A: jump or swim burst\nRMB / LT: grip · LMB / RT: attack\nShift / RB: roll · Ctrl / LB: squeeze\nE / X: interact · Wheel / Y: change weapon")
 	_slider("Master", master_level, func(value: float) -> void: master_level = value; _emit_settings())
 	_slider("Effects", effects_level, func(value: float) -> void: effects_level = value; _emit_settings())
 	_slider("Ambience", ambience_level, func(value: float) -> void: ambience_level = value; _emit_settings())
@@ -261,7 +262,7 @@ func update_hud(player: EEPlayer, region: String, resonators: int, direction: St
 	endurance_bar.modulate.a = 1.0 if player.vitals.endurance < 99 or player.mode in ["swim", "climb"] else 0.25
 	region_label.text = region.to_upper()
 	var weapon: String = str(player.attack_controller.get("weapon")) if player.attack_controller != null else "club"
-	weapon_label.text = {"club":"SOFT CLUB", "heavy":"STONEFIST", "thorn":"THORN LASH"}.get(weapon, weapon) + "  ·  Q / Y"
+	weapon_label.text = {"club":"SOFT CLUB", "heavy":"STONEFIST", "thorn":"THORN LASH"}.get(weapon, weapon) + "  ·  WHEEL / Y"
 	objective_label.text = ("RESONANCE  %d / 3\n" % resonators) + direction
 	prompt_label.text = prompt
 	if player.vitals.endurance <= 0.0:

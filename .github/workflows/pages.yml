@@ -1,0 +1,64 @@
+name: Build and deploy web game
+
+on:
+  push:
+    branches: [implementation/elastic-explorer]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Install Godot and matching web template
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot-download "$HOME/.local/share/godot/export_templates/4.7.1.stable"
+          gh release download 4.7.1-stable --repo godotengine/godot-builds --dir /tmp/godot-download \
+            --pattern Godot_v4.7.1-stable_linux.x86_64.zip \
+            --pattern Godot_v4.7.1-stable_export_templates.tpz \
+            --pattern SHA512-SUMS.txt
+          cd /tmp/godot-download
+          sha512sum --check --ignore-missing SHA512-SUMS.txt
+          unzip -q Godot_v4.7.1-stable_linux.x86_64.zip
+          chmod +x Godot_v4.7.1-stable_linux.x86_64
+          sudo mv Godot_v4.7.1-stable_linux.x86_64 /usr/local/bin/godot
+          unzip -j -q Godot_v4.7.1-stable_export_templates.tpz templates/web_nothreads_release.zip \
+            -d "$HOME/.local/share/godot/export_templates/4.7.1.stable"
+      - name: Import, test, and export
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --editor --import --path . 2>&1 | tee /tmp/import.log
+          ! grep -E '^(SCRIPT ERROR:|ERROR:)' /tmp/import.log
+          godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee /tmp/tests.log
+          ! grep -E '^(SCRIPT ERROR:|ERROR:|FAIL:)' /tmp/tests.log
+          mkdir -p builds/web
+          godot --headless --path . --export-release Web builds/web/index.html 2>&1 | tee /tmp/export.log
+          ! grep -E '^(SCRIPT ERROR:|ERROR:)' /tmp/export.log
+          touch builds/web/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: builds/web
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -296,9 +296,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("interact") and playing and not get_tree().paused and is_instance_valid(nearest):
 		activate_landmark(nearest)
-	elif event.is_action_pressed("cycle_weapon") and playing and not get_tree().paused:
+	elif (event.is_action_pressed("cycle_weapon") or event.is_action_pressed("previous_weapon")) and playing and not get_tree().paused:
 		var index: int = upgrades.find(str(player.attack_controller.get("weapon")))
-		player.attack_controller.set("weapon", upgrades[(index + 1) % upgrades.size()])
+		var direction: int = -1 if event.is_action_pressed("previous_weapon") else 1
+		player.attack_controller.set("weapon", upgrades[posmod(index + direction, upgrades.size())])
+		get_viewport().set_input_as_handled()
 
 func activate_landmark(marker: EELandmark) -> void:
 	if marker.kind == "checkpoint":
@@ -319,7 +321,7 @@ func activate_landmark(marker: EELandmark) -> void:
 			if not marker.kind in upgrades:
 				upgrades.append(marker.kind)
 			player.attack_controller.set("weapon", marker.kind)
-			ui.toast(marker.label + "\nQ / Y cycles your acquired forms", 5)
+			ui.toast(marker.label + "\nWheel / Y cycles your acquired forms", 5)
 		elif marker.kind == "health":
 			player.vitals.health = minf(100, player.vitals.health + 35)
 			ui.toast("Sunfruit · warmth returns")
@@ -367,7 +369,9 @@ func _process(delta: float) -> void:
 	if playing and not get_tree().paused:
 		elapsed += delta
 		autosave_elapsed += delta
-		world.update_view(player.global_position, elapsed)
+		# Follow the rendered camera vertically so jumps cannot pull the backdrop
+		# ahead of camera smoothing. Horizontal parallax still follows traversal.
+		world.update_view(Vector2(player.global_position.x, player.camera.get_screen_center_position().y + 65.0), elapsed)
 		if player.global_position.y > world.bounds.end.y - 70:
 			_on_death_deferred()
 		_update_proximity()
@@ -383,7 +387,7 @@ func _process(delta: float) -> void:
 			# Do not retry a filesystem failure every frame.
 			autosave_elapsed = 0.0
 	elif is_instance_valid(world) and not playing:
-		world.update_view(player.global_position, float(Time.get_ticks_msec()) / 1000.0)
+		world.update_view(Vector2(player.global_position.x, player.camera.get_screen_center_position().y + 65.0), float(Time.get_ticks_msec()) / 1000.0)
 	if not test_mode and frame_count == 300 and not screenshot_path.is_empty() and not capture_started:
 		_capture()
 	if not test_mode and quit_after_capture and screenshot_path.is_empty() and frame_count > 240:
