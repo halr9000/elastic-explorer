@@ -1,10 +1,28 @@
-# Elastic Explorer
+# Elastic Explorer · v0.1
 
-A Godot 4.7.1 exploration platformer. Become a small headless creature with sticky, stretching limbs; climb through the canopy, swim beneath luminous roots, and wake three alien resonators before returning to the first hearth.
+A small exploration experiment about a creature that can make almost any limb a hand, a foot, or a weapon.
+
+Stretch toward a ledge. Stick to a wall. Fold into a narrow passage, roll downhill, or swim beneath luminous roots. Follow the distant song through a persistent procedural wilderness, wake three alien resonators, and find your way back to the first hearth.
+
+![Elastic Explorer running on Steam Deck](docs/images/steam-deck.png)
+
+**Godot 4.7.1 · Windows + Steam Deck · Single player**
+
+## The experiment
+
+Your headless creature moves with procedurally animated, sticky limbs. Its shape changes with the task: upright for walking, compressed for tunnels, curled for speed, and stretched for climbing. Combat turns an available limb into a swollen tendril club, with heavy and thorned variations to discover.
+
+The world combines surface wilderness, caves, underwater passages, ruins, and alien artifacts. Layered scenery, luminous flora, dynamic lighting, wildlife, and procedural audio give the journey its atmosphere. A shared endurance pool makes the next dry foothold or patch of open water matter.
+
+**v0.1 closes this experiment as a playable prototype.** Windows and native Steam Deck builds are available locally, and the Deck build has been tried and accepted for this milestone. There is no crafting, construction, multiplayer, terrain destruction, or fluid simulation.
 
 ## Play
 
-Run `builds/ElasticExplorer.exe`, or run `Launch.ps1`. Open `project.godot` in Godot to edit. The Windows release embeds its game data and can run on its own.
+**Windows:** run `builds/ElasticExplorer.exe`, or run `Launch.ps1`. The executable embeds its game data and can run on its own.
+
+**Steam Deck:** launch **ElasticExplorer** from the Steam library after deployment. It runs natively on Linux at 1280×800 with gamepad controls.
+
+**From source:** open `project.godot` in Godot 4.7.1 and run the main scene. Exported binaries live in the ignored `builds/` directory; they are not included in Git.
 
 Start with **Movement clearing** to practice jumping, rolling, swimming, squeezing, and climbing. **Begin a new world** starts a persistent seeded expedition. Continue restores an existing expedition; starting again archives its files first.
 
@@ -28,7 +46,12 @@ Find the heavy tip and thorn lash along the route. Wake the Canopy Bell, Drowned
 
 ## Saves
 
-Windows saves live in `%APPDATA%/ElasticExplorer/`. The primary file is `expedition.json`; `.bak` holds the previous valid state. Terrain geometry is recorded, so Continue does not regenerate a different world. Pickups, defeated enemies, discoveries, weapon state, checkpoint, and completion persist.
+| Platform | Save directory |
+| --- | --- |
+| Windows | `%APPDATA%/ElasticExplorer/` |
+| Steam Deck | `~/.local/share/ElasticExplorer/` |
+
+The primary file is `expedition.json`; `.bak` holds the previous valid state. Terrain geometry is recorded, so Continue does not regenerate a different world. Pickups, defeated enemies, discoveries, weapon state, checkpoint, and completion persist.
 
 New World archives the previous expedition. Damaged originals are preserved when recovering a backup. Settings are separate in `settings.cfg`. Automated tests use separate test filenames and do not touch a real expedition.
 
@@ -39,7 +62,9 @@ New World archives the previous expedition. Damaged originals are preserved when
 ./tools/build.ps1
 ```
 
-The scripts locate the installed Godot console executable. Pass `-Godot 'C:/path/to/godot_console.exe'` to override. Tests run at real physics cadence; allow roughly 90 seconds. They check real player physics, 100 generated seeds, combat, persistence, and the expedition loop. Both exit codes and engine error output are checked.
+The Windows tooling requires PowerShell, Git, Python 3, and Godot 4.7.1 with matching export templates. The scripts locate the installed Godot console executable. Pass `-Godot 'C:/path/to/godot_console.exe'` to override.
+
+Tests run at real physics cadence; allow roughly 90 seconds. They check real player physics, 100 generated seeds, combat, persistence, and the expedition loop. Both exit codes and engine error output are checked. Building runs these tests by default.
 
 Build output includes a SHA-256 manifest. Matching Godot 4.7.1 export templates must be installed. `-SkipTests` on the build script is intended only after the same revision has passed verification.
 
@@ -60,8 +85,23 @@ registers a native Linux Gaming Mode shortcut at 1280×800, and verifies a fresh
 It preserves saves and other titles. The process guard is adapted from the simsim devkit workflow.
 The default gamepad bindings above apply to Deck controls; no keyboard entry is required.
 `--capture` runs a temporary sandbox smoke capture; deploy again without that flag to restore normal launch.
-Hands-on Deck controls, battery use, and sustained frame times still require playtesting.
 
-## Current delivery
+## v0.1 verification
 
-This is a playable first slice with original procedural art and audio. The 15–20-minute duration is a design target, not a measured result. Automated input and physics tests do not establish controller comfort or human playthrough pacing. See `docs/testing/first-expedition.md` for verification evidence and remaining checks.
+- Five automated suites passed, including validation of 100 generated seeds.
+- The native Deck executable was hash-verified after upload and launched through Steam.
+- A 1280×800 on-device opening-scene sample reported 60 fps, with a 16.71 ms median and 17.05 ms p95 frame time over 180 frames.
+- The owner reported that everything works well enough for the experiment.
+
+The short performance sample is not a sustained benchmark. Full-expedition pacing, battery life, and suspend/resume have not been systematically measured. The original 15–20-minute expedition length remains a design target.
+
+See [first expedition verification](docs/testing/first-expedition.md) and [Deck verification](docs/testing/steam-deck.md) for the recorded checks.
+
+## Project layout
+
+| Directory | Contents |
+| --- | --- |
+| `game/` | Player, combat, wildlife, world generation, presentation, saves, and UI |
+| `tests/` | Automated gameplay and persistence checks |
+| `tools/` | Test, export, and Steam Deck deployment scripts |
+| `docs/` | Design notes, implementation history, and verification evidence |
