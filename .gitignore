@@ -3,3 +3,4 @@ builds/
 .superpowers/
 *.tmp
 test-results/
+__pycache__/

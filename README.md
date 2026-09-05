@@ -43,6 +43,25 @@ The scripts locate the installed Godot console executable. Pass `-Godot 'C:/path
 
 Build output includes a SHA-256 manifest. Matching Godot 4.7.1 export templates must be installed. `-SkipTests` on the build script is intended only after the same revision has passed verification.
 
+## Steam Deck
+
+Build the native Linux x86-64 release and deploy through an already paired SteamOS devkit:
+
+```powershell
+./tools/build.ps1 -Target SteamDeck
+python tools/deploy_deck.py --dry-run
+python tools/deploy_deck.py
+```
+
+Deployment defaults to the paired Deck at `192.168.2.177`; override with `--host`.
+Use `--devkit` to override the installed SteamOSDevkitClient `windows-client` directory.
+The script verifies source and artifact hashes, uploads the separate `ElasticExplorer` title,
+registers a native Linux Gaming Mode shortcut at 1280×800, and verifies a fresh process.
+It preserves saves and other titles. The process guard is adapted from the simsim devkit workflow.
+The default gamepad bindings above apply to Deck controls; no keyboard entry is required.
+`--capture` runs a temporary sandbox smoke capture; deploy again without that flag to restore normal launch.
+Hands-on Deck controls, battery use, and sustained frame times still require playtesting.
+
 ## Current delivery
 
 This is a playable first slice with original procedural art and audio. The 15–20-minute duration is a design target, not a measured result. Automated input and physics tests do not establish controller comfort or human playthrough pacing. See `docs/testing/first-expedition.md` for verification evidence and remaining checks.
