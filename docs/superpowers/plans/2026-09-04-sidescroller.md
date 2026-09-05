@@ -119,4 +119,4 @@ The test runner must exit nonzero on failure. Use automated checks for endurance
 
 ## Status
 
-Planning complete. No game implementation, project initialization, or runtime tests have been performed yet.
+Implementation has been delivered as a playable first slice. See `../../implementation-progress.md` and `../../testing/first-expedition.md` for actual verification and the remaining hands-on acceptance checks. The detailed checklist above remains the original acceptance contract; it must not be treated as evidence that human playtesting or pacing acceptance occurred.
